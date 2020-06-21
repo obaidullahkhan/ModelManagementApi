@@ -18,6 +18,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 
+app.use("/images", express.static(`${__dirname}\\api\\controllers\\uploads`));
+
 var routes = require("./api/routes/modelManagementRoutes"); //importing route
 routes(app); //register the route
 

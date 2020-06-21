@@ -1,5 +1,6 @@
 "use strict";
 
+var path = require("path");
 var mongoose = require("mongoose");
 var formidable = require("formidable");
 
@@ -11,27 +12,27 @@ exports.list_all_models = async function (req, res) {
 };
 
 exports.create_a_model = async function (req, res) {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
-  // read files from request form
-  let fileUrls = [];
+  var x = {};
+  x.fileUrls = [];
   new formidable.IncomingForm()
     .parse(req)
+    .on("field", (name, field) => {
+      x[name] = field;
+    })
     .on("fileBegin", (name, file) => {
-      file.path = `~/uploads/${file.name}`;
+      file.path = path.join(__dirname, "uploads", file.name);
     })
     .on("file", (name, file) => {
       console.log("file Uploaded");
-      fileUrls.push(file.path);
+      // The port can change according to node port
+      x.fileUrls.push(`http://localhost:3900/images/${file.name}`);
+    })
+    .on("end", () => {
+      x.profilePic = x.fileUrls[0]; // setting the first url we can change this
+      var new_model = new Model(x);
+      new_model = new_model.save();
+      res.send(new_model);
     });
-
-  req.body.fileUrls = fileUrls;
-
-  var new_model = new Model(req.body);
-  new_model = await new_model.save();
-
-  res.send(new_model);
 };
 
 exports.read_a_model = async function (req, res) {
@@ -43,19 +44,31 @@ exports.read_a_model = async function (req, res) {
 };
 
 exports.update_a_model = async function (req, res) {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
-  const model = await Model.findOneAndUpdate(
-    { _id: req.params.modelId },
-    req.body,
-    { new: true }
-  );
-
-  if (!model)
-    return res.status(404).send("The model with the given ID was not found.");
-
-  res.send(model);
+  var x = {};
+  x.fileUrls = [];
+  new formidable.IncomingForm()
+    .parse(req)
+    .on("field", (name, field) => {
+      x[name] = field;
+    })
+    .on("fileBegin", (name, file) => {
+      file.path = path.join(__dirname, "uploads", file.name);
+    })
+    .on("file", (name, file) => {
+      console.log("file Uploaded");
+      // The port can change according to node port
+      x.fileUrls.push(`http://localhost:3900/images/${file.name}`);
+    })
+    .on("end", async () => {
+      x.profilePic = x.fileUrls[0]; // setting the first url we can change this
+      var new_model = new Model(x);
+      new_model = await Model.findOneAndUpdate(
+        { _id: req.params.modelId },
+        req.body,
+        { new: true }
+      );
+      res.send(new_model);
+    });
 };
 
 exports.delete_a_model = async function (req, res) {
