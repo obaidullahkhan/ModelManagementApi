@@ -19,33 +19,41 @@ var Model = mongoose.model(
     height: {
       type: Number,
       required: "Kindly enter the height value",
-      min: 0,
+      min: 1,
     },
     bust: {
       type: Number,
       required: "Kindly enter the bust value",
-      min: 0,
+      min: 1,
     },
     waist: {
       type: Number,
       required: "Kindly enter the waist value",
-      min: 0,
+      min: 1,
     },
     highHip: {
       type: Number,
       required: "Kindly enter the high hip value",
-      min: 0,
+      min: 1,
     },
     lowHip: {
       type: Number,
       required: "Kindly enter the low hip value",
-      min: 0,
+      min: 1,
+    },
+    fileUrls: {
+      type: Array,
+      default: [],
+    },
+    profilePic: {
+      type: String,
     },
   })
 );
 
 function validateModel(model) {
   const schema = {
+    files: Joi.any(),
     name: Joi.string().min(2).max(255).required(),
     modelWear: Joi.string().required(),
     height: Joi.number().min(1).required(),
